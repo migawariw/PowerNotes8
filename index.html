@@ -5,9 +5,6 @@
 <title>PowerNotes</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-/* ==========================
-   基本スタイル
-========================== */
 body{margin:0;padding:16px;font-family:sans-serif;font-size:16px;}
 section{max-width:800px;margin:auto;position:relative;}
 [hidden]{display:none;}
@@ -21,20 +18,11 @@ li{
   justify-content:space-between;
   align-items:center;
   position:relative;
-  user-select:none; /* 文字選択防止 */
+  user-select:none;
   cursor:default;
 }
 li:hover{background:#f5f5f5;}
-
-/* タイトル省略 */
-li .memo-title{
-  flex:1;
-  white-space: nowrap;
-  overflow:hidden;
-  text-overflow: ellipsis;
-  margin-right:8px;
-}
-
+li .memo-title{flex:1;white-space: nowrap;overflow:hidden;text-overflow: ellipsis;margin-right:8px;}
 #title{width:100%;font-size:20px;margin:8px 0;border:none;padding:0;box-sizing:border-box;}
 #editor{min-height:70vh;outline:none;white-space:pre-wrap;word-break:break-word;border-top:1px solid #ccc;padding-top:16px;}
 img{max-width:100%;display:block;margin:8px 0;}
@@ -44,43 +32,22 @@ img{max-width:100%;display:block;margin:8px 0;}
 .memo-right{display:flex;align-items:center;gap:8px;}
 .date-span{font-size:0.7em;color:#666;flex-shrink:0;}
 .menu-btn{background:none;border:none;font-size:16px;cursor:pointer;}
-.menu-popup{
-  position:absolute;top:100%;right:0;background:#fff;border:1px solid #ccc;padding:4px 0;
-  box-shadow:0 2px 6px rgba(0,0,0,0.2);display:none;z-index:10;
-}
+.menu-popup{position:absolute;top:100%;right:0;background:#fff;border:1px solid #ccc;padding:4px 0;box-shadow:0 2px 6px rgba(0,0,0,0.2);display:none;z-index:10;}
 .menu-popup button{width:100%;text-align:left;padding:4px 12px;background:none;border:none;cursor:pointer;}
 .menu-popup button:hover{background:#eee;}
 #user-icon{width:32px;height:32px;border-radius:50%;cursor:pointer;position:relative;}
-#user-menu{
-  position:absolute;top:40px;right:0;background:#fff;border:1px solid #ccc;
-  display:none;z-index:100;white-space:nowrap;
-}
-#toast{
-  display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
-  background:rgba(0,0,0,0.8);color:#fff;padding:12px 24px;border-radius:8px;
-  opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1000;
-}
+#user-menu{position:absolute;top:40px;right:0;background:#fff;border:1px solid #ccc;display:none;z-index:100;white-space:nowrap;}
+#toast{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.8);color:#fff;padding:12px 24px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity 0.3s ease;z-index:1000;}
 #toast.show{display:block;opacity:1;pointer-events:auto;}
-.preview-popup{
-  display:none;position:fixed;background:#fff;border:1px solid #333;
-  padding:8px;z-index:1000;max-width:80%;box-shadow:0 2px 6px rgba(0,0,0,0.3);
-}
+.preview-popup{display:none;position:fixed;background:#fff;border:1px solid #333;padding:8px;z-index:1000;max-width:80%;box-shadow:0 2px 6px rgba(0,0,0,0.3);}
 button{cursor:pointer;}
 .flex-between{display:flex;justify-content:space-between;align-items:center;}
-/* ==========================
-   ボタン長押し用スタイル
-========================== */
-.longpress-btn{
-  background:#eee;border:1px solid #ccc;padding:4px 8px;border-radius:4px;
-  user-select:none; cursor:pointer;
-}
+.longpress-btn{background:#eee;border:1px solid #ccc;padding:4px 8px;border-radius:4px;user-select:none;cursor:pointer;}
 </style>
 </head>
 <body>
 
-<!-- ==========================
-     ログイン画面
-========================== -->
+<!-- Login -->
 <section id="view-login">
   <h2>PowerNotes Login</h2>
   <input id="email" placeholder="email"><br>
@@ -90,9 +57,7 @@ button{cursor:pointer;}
   <button id="google-login">Login with Google</button>
 </section>
 
-<!-- ==========================
-     メモ一覧
-========================== -->
+<!-- Notes List -->
 <section id="view-list" hidden>
   <div class="flex-between">
     <h2>Notes</h2>
@@ -109,9 +74,7 @@ button{cursor:pointer;}
   <ul id="memo-list"></ul>
 </section>
 
-<!-- ==========================
-     ゴミ箱
-========================== -->
+<!-- Trash -->
 <section id="view-trash" hidden>
   <div class="flex-between">
     <h2>Trash</h2>
@@ -120,23 +83,15 @@ button{cursor:pointer;}
   <ul id="trash-list"></ul>
 </section>
 
-<!-- ==========================
-     エディター
-========================== -->
+<!-- Editor -->
 <section id="view-editor" hidden>
   <button id="back">← Back</button>
   <input id="title" placeholder="">
   <div id="editor" contenteditable="true"></div>
 </section>
 
-<!-- ==========================
-     トースト通知
-========================== -->
 <div id="toast"></div>
 
-<!-- ==========================
-     プレビュー
-========================== -->
 <div id="preview" class="preview-popup">
   <div id="preview-content"></div>
   <button id="copy-note">Copy</button>
@@ -145,9 +100,6 @@ button{cursor:pointer;}
 </div>
 
 <script type="module">
-// ==========================
-// Firebase初期化
-// ==========================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -157,9 +109,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// ==========================
-// 要素取得
-// ==========================
 const views={login:document.getElementById('view-login'),list:document.getElementById('view-list'),trash:document.getElementById('view-trash'),editor:document.getElementById('view-editor')};
 const emailInput=document.getElementById('email');
 const passwordInput=document.getElementById('password');
@@ -178,25 +127,14 @@ const closePreview=document.getElementById('close-preview');
 
 let currentMemoId=null;
 let longPressTimer=null;
+let isNavigating = false; // ← 二重ロード防止フラグ
 
-// ==========================
-// ユーティリティ
-// ==========================
-function showToast(msg,d=2000){ 
-  toast.textContent=msg; 
-  toast.classList.add('show'); 
-  setTimeout(()=>toast.classList.remove('show'),d); 
-}
-function show(view){ 
-  Object.values(views).forEach(v=>v.hidden=true); 
-  views[view].hidden=false; 
-}
+function showToast(msg,d=2000){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),d); }
+function show(view){ Object.values(views).forEach(v=>v.hidden=true); views[view].hidden=false; }
 
-// ==========================
-// Firebase認証
-// ==========================
 const provider=new GoogleAuthProvider();
 
+// ---------------- Auth ----------------
 document.getElementById('login').onclick=async ()=>{
   try{ await signInWithEmailAndPassword(auth,emailInput.value,passwordInput.value); } 
   catch(e){ showToast("ログイン失敗: "+e.message); }
@@ -210,27 +148,16 @@ document.getElementById('google-login').onclick=async()=>{
   catch(e){ showToast("Googleログイン失敗: "+e.message); }
 };
 
-// ユーザーメニュー切替
 userIcon.onclick=()=>{ userMenu.style.display=(userMenu.style.display==='block')?'none':'block'; }
-document.getElementById('switch-account').onclick=async()=>{ 
-  userMenu.style.display='none'; 
-  try{ await signInWithPopup(auth,provider); } 
-  catch(e){ showToast("切替失敗"); } 
-}
-document.getElementById('logout-btn').onclick=()=>{ 
-  userMenu.style.display='none'; 
-  signOut(auth); 
-  location.hash='#login'; 
-}
+document.getElementById('switch-account').onclick=async()=>{ userMenu.style.display='none'; try{ await signInWithPopup(auth,provider); } catch(e){ showToast("切替失敗"); } }
+document.getElementById('logout-btn').onclick=()=>{ userMenu.style.display='none'; signOut(auth); location.hash='#login'; }
 
 // 外部クリックでメニュー閉じる
 document.addEventListener('click',e=>{
   if(!userMenu.contains(e.target) && e.target!==userIcon) userMenu.style.display='none';
 });
 
-// ==========================
-// 画面切替・ナビゲーション
-// ==========================
+// ---------------- Navigation ----------------
 onAuthStateChanged(auth, async user => {
   if(user){
     if(user.photoURL) userIcon.src=user.photoURL;
@@ -241,91 +168,54 @@ onAuthStateChanged(auth, async user => {
     show('login');
   }
 });
-
 window.addEventListener('hashchange',()=>{ if(auth.currentUser) navigate(); });
 
-// ==========================
-// メモ一覧ロード
-// ==========================
+// ---------------- Load Memos ----------------
 async function loadMemos(){
-  memoList.innerHTML=''; // クリアして二重表示防止
+  memoList.innerHTML=''; // ← 二重表示防止
   const q=query(collection(db,'users',auth.currentUser.uid,'memos'),orderBy('updated','desc'));
   const snap=await getDocs(q);
   snap.forEach(d=>{
     const data=d.data();
     if(data.deletedAt) return;
-
     const li=document.createElement('li');
 
-    // ==========================
-    // タイトル表示
-    // ==========================
     const titleSpan=document.createElement('span');
     titleSpan.className='memo-title';
     titleSpan.textContent=data.title||'Untitled';
     li.appendChild(titleSpan);
 
-    // ==========================
-    // ボタンを右側に配置
-    // ==========================
-    const rightDiv=document.createElement('div'); 
-    rightDiv.className='memo-right';
+    const rightDiv=document.createElement('div'); rightDiv.className='memo-right';
+    const dateSpan=document.createElement('span'); dateSpan.className='date-span';
+    dateSpan.textContent=new Date(data.updated).toLocaleString('ja-JP',{year:'numeric', month:'2-digit', day:'2-digit',hour:'2-digit', minute:'2-digit'});
 
-    const dateSpan=document.createElement('span'); 
-    dateSpan.className='date-span';
-    dateSpan.textContent=new Date(data.updated).toLocaleString('ja-JP',{
-      year:'numeric', month:'2-digit', day:'2-digit',
-      hour:'2-digit', minute:'2-digit'
-    });
-
-    const menuBtn=document.createElement('button'); 
-    menuBtn.textContent='…'; menuBtn.className='menu-btn';
+    const menuBtn=document.createElement('button'); menuBtn.textContent='…'; menuBtn.className='menu-btn longpress-btn';
     const menuPopup=document.createElement('div'); menuPopup.className='menu-popup';
 
     const copyAction=document.createElement('button'); copyAction.textContent='Copy';
-    copyAction.onclick=async(e)=>{ 
-      e.stopPropagation(); 
-      navigator.clipboard.writeText(data.content||''); 
-      showToast('Copied'); 
-      menuPopup.style.display='none'; 
-    }
-
+    copyAction.onclick=async(e)=>{ e.stopPropagation(); navigator.clipboard.writeText(data.content||''); showToast('Copied'); menuPopup.style.display='none'; }
     const deleteAction=document.createElement('button'); deleteAction.textContent='Delete';
-    deleteAction.onclick=async(e)=>{ 
-      e.stopPropagation(); 
-      await setDoc(doc(db,'users',auth.currentUser.uid,'memos',d.id),{deletedAt:Date.now()},{merge:true}); 
-      li.remove(); showToast('Moved to Trash'); menuPopup.style.display='none'; 
-    }
+    deleteAction.onclick=async(e)=>{ e.stopPropagation(); await setDoc(doc(db,'users',auth.currentUser.uid,'memos',d.id),{deletedAt:Date.now()},{merge:true}); li.remove(); showToast('Moved to Trash'); menuPopup.style.display='none'; }
 
     menuPopup.append(copyAction,deleteAction);
-    menuBtn.onclick=(e)=>{ 
-      e.stopPropagation(); 
-      menuPopup.style.display=(menuPopup.style.display==='block')?'none':'block'; 
-    }
+    menuBtn.onclick=(e)=>{ e.stopPropagation(); menuPopup.style.display=(menuPopup.style.display==='block')?'none':'block'; }
 
     rightDiv.append(dateSpan,menuBtn,menuPopup);
     li.appendChild(rightDiv);
 
-    // ==========================
-    // 長押しでプレビュー
-    // ボタン部分のみ長押し可
-    // ==========================
-    menuBtn.classList.add('longpress-btn');
+    // 長押しでプレビュー（ボタン部分のみ）
     menuBtn.addEventListener('mousedown',()=>{ longPressTimer=setTimeout(()=>{ showPreview(d.id,data.title,data.content); },500); });
     menuBtn.addEventListener('mouseup',()=>{ clearTimeout(longPressTimer); });
     menuBtn.addEventListener('mouseleave',()=>{ clearTimeout(longPressTimer); });
     menuBtn.addEventListener('touchstart',()=>{ longPressTimer=setTimeout(()=>{ showPreview(d.id,data.title,data.content); },500); });
     menuBtn.addEventListener('touchend',()=>{ clearTimeout(longPressTimer); });
 
-    // li自体のクリックでエディターを開く
     li.onclick=()=>location.hash=`#/editor/${d.id}`;
     memoList.appendChild(li);
   });
 }
 
-// ==========================
-// ゴミ箱ロード
-// ==========================
+// ---------------- Trash ----------------
 async function loadTrash(){
   trashList.innerHTML='';
   const thirtyDaysAgo = Date.now() - 30*24*60*60*1000;
@@ -334,7 +224,6 @@ async function loadTrash(){
   snap.forEach(d=>{
     const data=d.data();
     if(!data.deletedAt || data.deletedAt<thirtyDaysAgo) return;
-
     const li=document.createElement('li');
     const titleSpan=document.createElement('span'); titleSpan.className='memo-title';
     titleSpan.textContent=data.title||'Untitled';
@@ -342,14 +231,10 @@ async function loadTrash(){
 
     const rightDiv=document.createElement('div'); rightDiv.className='memo-right';
     const dateSpan=document.createElement('span'); dateSpan.className='date-span';
-    dateSpan.textContent=new Date(data.deletedAt).toLocaleString('ja-JP',{
-      year:'numeric', month:'2-digit', day:'2-digit',
-      hour:'2-digit', minute:'2-digit'
-    });
+    dateSpan.textContent=new Date(data.deletedAt).toLocaleString('ja-JP',{year:'numeric', month:'2-digit', day:'2-digit',hour:'2-digit', minute:'2-digit'});
 
     const restoreBtn=document.createElement('button'); restoreBtn.textContent='Restore';
     restoreBtn.onclick=async(e)=>{ e.stopPropagation(); await setDoc(doc(db,'users',auth.currentUser.uid,'memos',d.id),{deletedAt:null},{merge:true}); li.remove(); showToast('Restored'); }
-
     const deleteBtn=document.createElement('button'); deleteBtn.textContent='Delete';
     deleteBtn.onclick=async(e)=>{ e.stopPropagation(); await setDoc(doc(db,'users',auth.currentUser.uid,'memos',d.id),{deletedAt:Date.now()-31*24*60*60*1000},{merge:true}); li.remove(); showToast('Deleted'); }
 
@@ -359,12 +244,10 @@ async function loadTrash(){
   });
 }
 
-// ==========================
-// エディター操作
-// ==========================
+// ---------------- Editor ----------------
 async function openEditor(id){
   currentMemoId=id;
-  editor.innerHTML=''; // 前のメモが残らないようにリセット
+  editor.innerHTML=''; // 前のメモリセット
   titleInput.value='';
   const snap=await getDoc(doc(db,'users',auth.currentUser.uid,'memos',id));
   const data=snap.data();
@@ -372,117 +255,72 @@ async function openEditor(id){
   editor.innerHTML=data.content||'';
   show('editor');
 }
-
-// 戻る
 document.getElementById('back').onclick=()=>{ if(history.length>1) history.back(); else location.hash='#/list'; }
 
-// 保存
 async function saveMemo(){
   if(!currentMemoId) return;
   let title=titleInput.value.trim();
   if(!title) title=editor.innerText.split('\n')[0].trim()||'';
-  await setDoc(doc(db,'users',auth.currentUser.uid,'memos',currentMemoId),
-    {title,content:editor.innerHTML,updated:Date.now()},{merge:true});
+  await setDoc(doc(db,'users',auth.currentUser.uid,'memos',currentMemoId),{title,content:editor.innerHTML,updated:Date.now()},{merge:true});
 }
 editor.addEventListener('input',saveMemo);
 titleInput.addEventListener('input',saveMemo);
 
-// ==========================
-// 新規メモ作成
-// ==========================
-document.getElementById('new-memo').onclick=async()=>{
-  const ref=await addDoc(collection(db,'users',auth.currentUser.uid,'memos'),{title:'',content:'',updated:Date.now(),deletedAt:null});
-  location.hash=`#/editor/${ref.id}`;
-}
-
-// ==========================
-// ゴミ箱遷移
-// ==========================
-document.getElementById('go-trash').onclick=()=>{ location.hash='#/trash'; }
-document.getElementById('back-list').onclick=()=>{ location.hash='#/list'; }
-
-// ==========================
-// プレビュー表示
-// ==========================
-function showPreview(id,title,content){
-  previewContent.innerHTML=`<strong>${title}</strong><br>${content}`;
-  preview.style.display='block';
-  copyBtn.onclick=()=>{ navigator.clipboard.writeText(content||''); showToast('Copied'); }
-  deleteBtn.onclick=async()=>{ await setDoc(doc(db,'users',auth.currentUser.uid,'memos',id),{deletedAt:Date.now()},{merge:true}); preview.style.display='none'; loadMemos(); showToast('Moved to Trash'); }
-  closePreview.onclick=()=>preview.style.display='none';
-}
-
-// ==========================
-// ペースト時の画像・YouTube処理
-// ==========================
+// ---------------- Paste Handling ----------------
 editor.addEventListener('paste', e=>{
   e.preventDefault();
   const items=e.clipboardData.items;
   const range=document.getSelection().getRangeAt(0);
 
-  // 画像貼り付け
   for(const item of items){
     if(item.type.startsWith('image/')){
       const reader=new FileReader();
-      reader.onload=()=>{ 
-        const img=document.createElement('img'); 
-        img.src=reader.result; 
-        img.onload=saveMemo; // 読み込み完了後に保存
-        range.insertNode(img); 
-        range.collapse(false); 
-      }
+      reader.onload=()=>{ const img=document.createElement('img'); img.src=reader.result; img.onload=saveMemo; range.insertNode(img); range.collapse(false); }
       reader.readAsDataURL(item.getAsFile());
       return;
     }
   }
 
   const text=e.clipboardData.getData('text/plain');
-
-  // YouTube埋め込み
   const yt=text.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  if(yt){
-    const wrap=document.createElement('div'); wrap.className='video';
-    const iframe=document.createElement('iframe');
-    iframe.src=`https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`;
-    iframe.allowFullscreen=true;
-    wrap.appendChild(iframe);
-    range.insertNode(wrap); range.collapse(false); saveMemo();
-    return;
-  }
+  if(yt){ const wrap=document.createElement('div'); wrap.className='video'; const iframe=document.createElement('iframe'); iframe.src=`https://www.youtube-nocookie.com/embed/${yt[1]}?modestbranding=1&rel=0&playsinline=1`; iframe.allowFullscreen=true; wrap.appendChild(iframe); range.insertNode(wrap); range.collapse(false); saveMemo(); return; }
 
-  // 画像URL
   const urlRegex=/https?:\/\/\S+\.(?:png|jpg|jpeg|gif)/i;
   const m=text.match(urlRegex);
-  if(m){
-    const img=document.createElement('img'); img.src=m[0];
-    range.insertNode(img); range.collapse(false); saveMemo();
-    return;
-  }
+  if(m){ const img=document.createElement('img'); img.src=m[0]; range.insertNode(img); range.collapse(false); saveMemo(); return; }
 
-  // プレーンテキスト
   range.insertNode(document.createTextNode(text));
   range.collapse(false);
   saveMemo();
 });
 
-// ==========================
-// ナビゲーション
-// ==========================
+// ---------------- Navigation ----------------
 async function navigate(){
+  if(isNavigating) return;
+  isNavigating = true;
   const hash=location.hash;
-  if(hash.startsWith('#/editor/')) { 
-    show('editor'); 
-    await openEditor(hash.split('/')[2]); 
-  }
-  else if(hash==='#/list' || hash==='') { 
-    show('list'); 
-    await loadMemos(); 
-  }
-  else if(hash==='#/trash') { 
-    show('trash'); 
-    await loadTrash(); 
-  }
+  if(hash.startsWith('#/editor/')) { show('editor'); await openEditor(hash.split('/')[2]); }
+  else if(hash==='#/list' || hash==='') { show('list'); await loadMemos(); }
+  else if(hash==='#trash') { show('trash'); await loadTrash(); }
   else if(hash==='#login') show('login');
+  isNavigating = false;
+}
+
+// ---------------- New Memo ----------------
+document.getElementById('new-memo').onclick=async()=>{
+  const ref=await addDoc(collection(db,'users',auth.currentUser.uid,'memos'),{title:'',content:'',updated:Date.now(),deletedAt:null});
+  location.hash=`#/editor/${ref.id}`;
+}
+document.getElementById('go-trash').onclick=()=>{ location.hash='#/trash'; }
+document.getElementById('back-list').onclick=()=>{ location.hash='#/list'; }
+
+// ---------------- Preview ----------------
+function showPreview(id,title,content){
+  previewContent.innerHTML=`<strong>${title}</strong><br>${content}`;
+  preview.style.display='block';
+  copyBtn.onclick=()=>{ navigator.clipboard.writeText(content||''); showToast('Copied'); }
+  deleteBtn.onclick=async()=>{ await setDoc(doc(db,'users',auth.currentUser.uid,'memos',id),{deletedAt:Date.now()},{merge:true}); preview.style.display='none'; loadMemos(); showToast('Moved to Trash'); }
+  closePreview.onclick=()=>preview.style.display='none';
 }
 </script>
 </body>
